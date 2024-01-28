@@ -1,10 +1,10 @@
+import Spinner from 'react-bootstrap/Spinner';
 function Loader() {
 
   return (
-
-    <div className="spinner-border m-5" role="status">
-      <span class="sr-only">Loading...</span>
-    </div>
+    <Spinner animation="border" role="status">
+      <span className="visually-hidden" style={{ fontWeight: 'bold' }}>Loading...</span>
+    </Spinner>
   );
 }
 
