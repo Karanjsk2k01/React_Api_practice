@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import MoviesList from './components/MoviesList';
 import './App.css';
 import Loader from './components/utils/Loader';
@@ -10,15 +10,16 @@ function App() {
   const [error, seterror] = useState(null);
   const [retrying, setRetrying] = useState(false);
 
-  const fetchHandler = async () => {
+
+
+  const fetchHandler = useCallback(async () => {
 
     try {
 
       setLoading(prev => !prev);
-
       seterror(null)
 
-      const response = await fetch('https://swapi.dev/api/film/')
+      const response = await fetch('https://swapi.dev/api/films/')
 
       if (!response.ok) {
         throw new Error("Something went wrong ...retrying")
@@ -46,17 +47,13 @@ function App() {
 
     }
     setLoading(prev => !prev);
-  }
-
-  const handleRetryClick = () => {
     setRetrying(true);
-    fetchHandler();
-  };
+  }, []);
 
-  const handleStopRetryClick = () => {
-    setRetrying(false);
-    seterror('Something went wrong')
-  };
+  useEffect(() => {
+    fetchHandler()
+  }, [fetchHandler]);
+
 
 
   useEffect(() => {
@@ -68,7 +65,14 @@ function App() {
       return () => clearTimeout(retryTimeout)
     }
 
-  }, [error, retrying])
+  }, [error, retrying]);
+
+
+
+  const handleStopRetryClick = () => {
+    setRetrying(false);
+    seterror('Something went wrong')
+  };
 
 
   let content = <p>No Movies Found</p>
@@ -88,7 +92,7 @@ function App() {
   return (
     <React.Fragment>
       <section>
-        <button onClick={handleRetryClick} disabled={retrying}>Fetch Movies</button>
+        <button onClick={fetchHandler} >Fetch Movies</button>
       </section>
       <section>
         {content}
