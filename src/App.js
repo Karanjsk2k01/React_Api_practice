@@ -20,7 +20,7 @@ function App() {
       setLoading(prev => !prev);
       seterror(null)
 
-      const response = await fetch('https://swapi.dev/api/films/')
+      const response = await fetch('https://react-api-demo-f9b0e-default-rtdb.firebaseio.com/movies.json')
 
       if (!response.ok) {
         throw new Error("Something went wrong ...retrying")
@@ -28,17 +28,20 @@ function App() {
 
       const jsonResponse = await response.json();
 
-      const transformedData = jsonResponse.results.map((item) => {
+      const loadedMovies = [];
 
-        return {
-          id: item.episode_id,
-          title: item.title,
-          releaseDate: item.release_date,
-          openingText: item.opening_crawl
-        };
-      })
+      for (const key in jsonResponse) {
+        const object = {
+          id: key,
+          title: jsonResponse[key].title,
+          releaseDate: jsonResponse[key].releaseDate,
+          openingText: jsonResponse[key].openingText
+        }
 
-      setMovieList(transformedData);
+        loadedMovies.push(object)
+      }
+
+      setMovieList(loadedMovies);
 
       setLoading(prev => !prev);
 
@@ -71,7 +74,37 @@ function App() {
 
   }, [error, retrying]);
 
+  const AddMovieHandler = async (movie) => {
+    const res = await fetch('https://react-api-demo-f9b0e-default-rtdb.firebaseio.com/movies.json', {
+      method: 'POST',
+      body: JSON.stringify(movie),
+      headers: {
+        'content-type': 'application/json'
+      }
+    })
 
+    const data = await res.json();
+    console.log(data)
+  }
+
+  const deleteHandler = async (id) => {
+
+    try {
+
+      const res = await fetch(`https://react-api-demo-f9b0e-default-rtdb.firebaseio.com/movies/${id}.json`,
+        {
+          method: 'DELETE'
+        })
+
+      if (!res.ok) { throw new Error('Item cannot deleted') }
+
+      setMovieList(movie => movie.filter(movie => movie.id !== id))
+
+    } catch (error) {
+      console.log(error.message)
+    }
+
+  }
 
   const handleStopRetryClick = () => {
     setRetrying(false);
@@ -86,7 +119,7 @@ function App() {
   }
 
   if (movieList.length > 0) {
-    content = <MoviesList movies={movieList} />
+    content = <MoviesList movies={movieList} onDelete={deleteHandler} />
   }
 
   if (error) {
@@ -96,7 +129,7 @@ function App() {
   return (
     <React.Fragment>
       <section>
-        <AddMovie />
+        <AddMovie onAddMovie={AddMovieHandler} />
       </section>
       <section>
         <button onClick={fetchHandler} >Fetch Movies</button>
