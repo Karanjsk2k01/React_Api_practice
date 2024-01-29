@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import MoviesList from './components/MoviesList';
 import './App.css';
 import Loader from './components/utils/Loader';
+import AddMovie from './components/AddMovies';
 
 function App() {
 
@@ -46,9 +47,12 @@ function App() {
       seterror(error.message)
 
     }
+
     setLoading(prev => !prev);
     setRetrying(true);
+
   }, []);
+
 
   useEffect(() => {
     fetchHandler()
@@ -91,6 +95,9 @@ function App() {
 
   return (
     <React.Fragment>
+      <section>
+        <AddMovie />
+      </section>
       <section>
         <button onClick={fetchHandler} >Fetch Movies</button>
       </section>
